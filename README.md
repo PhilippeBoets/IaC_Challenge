@@ -1,2 +1,1 @@
-# IaC_Challenge
-Infrastructure as code opdracht voor emerging technologies
+# IaC_Challange_PFK_Team_10

@@ -1,0 +1,58 @@
+---
+- name: create_vm
+  hosts: localhost
+  connection: local
+  tasks:
+
+  - name: Create public ip
+    azure_rm_publicipaddress:
+      resource_group: IaCJenkins_group
+      allocation_method: Static
+      name: publicip1
+      domain_name: iac-group10-webserver
+  - name: create sec group
+    azure_rm_securitygroup:
+      resource_group: IaCJenkins_group
+      name: secgroup1
+      rules:
+        - name: SSH
+          protocol: Tcp
+          destination_port_range: 22
+          access: Allow
+          priority: 1001
+          direction: Inbound
+        - name: HTTP
+          protocol: Tcp
+          destination_port_range: 80
+          access: Allow
+          priority: 1002
+          direction: Inbound
+  - name: create NIC
+    azure_rm_networkinterface:
+      resource_group: IaCJenkins_group
+      name: nic1
+      virtual_network: IaCJenkins_group-vnet
+      subnet: default
+      public_ip_name: publicip1
+      security_group: secgroup1
+      private_ip_address: 10.1.0.5
+      private_ip_allocation_method: Static
+  - name: Create virtual machine
+    azure_rm_virtualmachine:
+      resource_group: IaCJenkins_group
+      name: webserver
+      vm_size: Standard_B1s
+      admin_username: jenkins
+      ssh_password_enabled: false
+      ssh_public_keys:
+        - path: /home/jenkins/.ssh/authorized_keys
+          key_data: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDPUXyr2IUS1wBIGNRSPDD+jVpjmnxZyQ216aMTs51Tdntfwp4UvFMRUEGbkuj2OgL0/75uU/rHPyF9xul0r2Caz18+KejasntKlM90tGiQWjDbTFFY8cVJeGcsciJGoYUbUXUHPQ95igXlk06DGjSYO2CJY0EDq2tk8TaphNq5aNWeivOBbVsTYquRh8nrOVnVBppA6TIYbm/TIe640ZURk6GhkukvbYgN24IAPniEcDEbkGa+g70T9483oV5a0Ye4KZb1mFUHLiStI231V8VFrLguXkpp6L5uYJMlRrHRtGHvHnop8dvyilVFP4ZVGvsILlA/I83LsGirFfv5B0vtBEPPw35juQfX90zXr48fAWJiuGLlG3WaAh0PUES2B2BKaBceALFz35V+7n08/kOn92fIro4GYUsTU88whxMSHPvQgIoEMvujQfIwuQdDTjlvwVaBX5o2qtJLk/lsE/vxvAwQOgWiIcbu6vV1MUEgdLIbvffu0rH7sMQdnK7ud70= jenkins@IaCJenkins
+      network_interfaces: nic1
+      image:
+        offer: UbuntuServer
+        publisher: Canonical
+        sku: '18.04-LTS'
+        version: latest
+  - name: Pause for 1 minute for vm to start
+    pause:
+      minutes: 1

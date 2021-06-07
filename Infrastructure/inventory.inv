@@ -1,0 +1,2 @@
+[webservers]
+iac-group10-webserver.westeurope.cloudapp.azure.com ansible_user=jenkins

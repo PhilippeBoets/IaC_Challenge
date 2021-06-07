@@ -1,0 +1,32 @@
+---
+- name: remove web resources
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Remove a VM and all resources that were autocreated
+      azure_rm_virtualmachine:
+        resource_group: IaCJenkins_group
+        name: webserver
+        remove_on_absent: all_autocreated
+        state: absent
+
+    - name: Delete nic
+      azure_rm_networkinterface:
+        resource_group: IaCJenkins_group
+        name: nic1
+        state: absent
+
+    - name: delete public ip
+      azure_rm_publicipaddress:
+        resource_group: IaCJenkins_group
+        allocation_method: Static
+        name: publicip1
+        state: absent
+
+
+
+    - name: delete security group
+      azure_rm_securitygroup:
+        resource_group: IaCJenkins_group
+        name: secgroup1
+        state: absent
